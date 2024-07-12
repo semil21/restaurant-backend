@@ -1,10 +1,10 @@
-import { response } from "express";
-import Category from "../schemas/category.schema";
+import Category from "../../schemas/category/category.schema";
 import expressAsyncHandler from "express-async-handler";
 
 const createNewCategory = expressAsyncHandler(async (req, res) => {
+    const { categoryName, categorySlug } = req.body
     try {
-        const saveCategory = await Category.create(req.body)
+        const saveCategory = await Category.create({ name: categoryName, slug: categorySlug })
 
         if (saveCategory) {
             res.status(200).send({ response: saveCategory })
@@ -14,7 +14,7 @@ const createNewCategory = expressAsyncHandler(async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).send({ response: 'Server Error, Failed to create category' })
+        res.status(500).send({ response: 'Category already exists' })
     }
 })
 

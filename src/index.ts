@@ -20,14 +20,18 @@ app.use((req, res, next) => {
 
 import userRouter from "./routes/user.route";
 import adminRouter from "./routes/admin.route";
-import categoryRouter from "./routes/category.route";
-import productRouter from "./routes/product.route";
+import categoryRouter from "./routes/category/category.route";
+import subCategoryRouter from "./routes/category/subCategory.route";
+import productRouter from "./routes/product/product.route";
+import productSizeRouter from "./routes/product/productSize.route";
 import notFound from "./middleware/notFound";
 
 app.use("/user", userRouter)
 app.use("/admin", adminRouter)
 app.use("/category", categoryRouter)
+app.use("/subCategory", subCategoryRouter)
 app.use("/product", productRouter)
+app.use("/product-size", productSizeRouter)
 
 
 

@@ -1,18 +1,19 @@
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 const productColorSchema = new mongoose.Schema({
+    product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+    },
     size: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "ProductSize",
-        require: true
+        ref: "ProductSize"
     },
-    color: {
-        type: String,
-        require: true
+    name: {
+        type: String
     },
-    quantity: {
-        type: Number,
-        require: true
+    stock: {
+        type: Number
     },
     status: {
         type: Boolean,

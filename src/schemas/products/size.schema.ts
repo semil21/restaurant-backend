@@ -1,14 +1,12 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const productSizeSchema = new mongoose.Schema({
     product: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        require: true
+        ref: "Product"
     },
     size: {
-        type: String,
-        require: true
+        type: String
     },
     status: {
         type: Boolean,
