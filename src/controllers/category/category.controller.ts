@@ -2,9 +2,9 @@ import Category from "../../schemas/category/category.schema";
 import expressAsyncHandler from "express-async-handler";
 
 const createNewCategory = expressAsyncHandler(async (req, res) => {
-    const { categoryName, categorySlug } = req.body
+    const { categoryName } = req.body
     try {
-        const saveCategory = await Category.create({ name: categoryName, slug: categorySlug })
+        const saveCategory = await Category.create({ name: categoryName })
 
         if (saveCategory) {
             res.status(200).send({ response: saveCategory })
@@ -14,7 +14,8 @@ const createNewCategory = expressAsyncHandler(async (req, res) => {
         }
     }
     catch (error) {
-        res.status(500).send({ response: 'Category already exists' })
+        console.log('error --------', error)
+        res.status(500).send({ response: 'Server Error, failed to create new category' })
     }
 })
 
@@ -77,4 +78,26 @@ const deleteCategory = expressAsyncHandler(async (req, res) => {
     }
 })
 
-export default { createNewCategory, getCategories, updateCategory, deleteCategory }
+const updateCategoryStatus = expressAsyncHandler(async (req, res) => {
+    const { categoryId } = req.params
+    const { status } = req.body
+    try {
+        const updateRecord = await Category.findByIdAndUpdate(
+            { _id: categoryId },
+            { status: status },
+            { new: true }
+        )
+
+        if (updateRecord) {
+            res.status(200).send({ response: 'Status updated successfully' })
+        }
+        else {
+            res.status(400).send({ response: 'Failed to update category status' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ reponse: 'Server error, failed to update category status' })
+    }
+})
+
+export default { createNewCategory, getCategories, updateCategory, deleteCategory, updateCategoryStatus }

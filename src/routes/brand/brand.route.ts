@@ -5,5 +5,6 @@ const brandRouter = express.Router()
 
 brandRouter.get("/", brandController.getBrands)
 brandRouter.post("/add", brandController.createNewBrand)
+brandRouter.put("/update-status/:brandId", brandController.updateBrandStatus)
 
 export default brandRouter

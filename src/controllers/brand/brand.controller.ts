@@ -2,33 +2,66 @@ import Brand from "../../schemas/brand/branch.schema"
 import BrandLogo from "../../schemas/brand/brandImage"
 import expressAsyncHandler from "express-async-handler"
 
-const createNewBrand = expressAsyncHandler(async (req, res) => {
+const createNewBrand = expressAsyncHandler(async (req: any, res: any) => {
+    const { brandName, brandDescription, originCountry, brandLogo } = req.body;
 
-    const { brandName, brandDescription, originCountry, brandLogo } = req.body
     try {
-        const saveBrand = await Brand.create({ name: brandName, description: brandDescription, origin: originCountry })
+        const saveBrand = await Brand.create({ name: brandName, description: brandDescription, origin: originCountry });
 
-        if (saveBrand) {
-
-            const brandId = saveBrand._id
-
-            const brandImage = await BrandLogo.create({ brand: brandId, logo: brandLogo })
-
-            if (brandImage) {
-                res.status(200).send({ response: saveBrand, brandImage })
-            }
-            else {
-                res.status(400).send({ response: 'Failed to save brand image' })
-            }
+        if (!saveBrand) {
+            return res.status(400).send({ response: 'Brand already exists' });
         }
-        else {
-            res.status(400).send({ response: 'Brand already exists' })
+
+        const brandId = saveBrand._id;
+        const brandImage = await BrandLogo.create({ brand: brandId, logo: brandLogo });
+
+        if (!brandImage) {
+            return res.status(400).send({ response: 'Failed to save brand image' });
         }
+
+        const pipeline = [
+            {
+                $match: { _id: saveBrand._id }
+            },
+            {
+                $lookup: {
+                    from: "brandlogos",
+                    localField: "_id",
+                    foreignField: "brand",
+                    as: "result"
+                }
+            },
+            {
+                $addFields: {
+                    logo: { $arrayElemAt: ["$result.logo", 0] }
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    description: 1,
+                    origin: 1,
+                    status: 1,
+                    logo: 1,
+                    __v: 1
+                }
+            }
+        ];
+
+        const aggregatedBrand = await Brand.aggregate(pipeline);
+
+        if (aggregatedBrand.length > 0) {
+            res.status(200).send({ response: aggregatedBrand[0] });
+        } else {
+            res.status(404).send({ response: 'Brand not found after aggregation' });
+        }
+
+    } catch (error) {
+        console.error("Error creating new brand:", error);
+        res.status(500).send({ response: "Server error, failed to create new brand" });
     }
-    catch (error) {
-        res.status(500).send({ response: "Server error, failed to create new brand" })
-    }
-})
+});
 
 const getBrands = expressAsyncHandler(async (req, res) => {
 
@@ -37,29 +70,28 @@ const getBrands = expressAsyncHandler(async (req, res) => {
         const getBrandPipeline = [
             {
                 $lookup: {
-                    from: "brands",
-                    localField: "brand",
-                    foreignField: "_id",
-                    as: "brand"
+                    from: "brandlogos",
+                    localField: "_id",
+                    foreignField: "brand",
+                    as: "brands"
                 }
             },
             {
-                $unwind: "$brand"
+                $unwind: "$brands"
             },
             {
                 $project: {
                     _id: 1,
-                    brandId: "$brand._id",
-                    name: "$brand.name",
-                    description: "$brand.description",
-                    origin: "$brand.origin",
-                    status: "$brand.status",
-                    logo: 1
+                    name: 1,
+                    description: 1,
+                    status: 1,
+                    origin: 1,
+                    "logo": "$brands.logo"
                 }
             }
         ]
 
-        const getRecords = await BrandLogo.aggregate(getBrandPipeline)
+        const getRecords = await Brand.aggregate(getBrandPipeline)
 
         if (getRecords) {
             res.status(200).send({ response: getRecords })
@@ -73,5 +105,29 @@ const getBrands = expressAsyncHandler(async (req, res) => {
     }
 })
 
+const updateBrandStatus = expressAsyncHandler(async (req, res) => {
 
-export default { createNewBrand, getBrands }
+    const { brandId } = req.params
+    const { status } = req.body
+
+    try {
+        const updateRecord = await Brand.findByIdAndUpdate(
+            { _id: brandId },
+            { status: status },
+            { new: true }
+        )
+
+        if (updateRecord) {
+            res.status(200).send({ response: updateRecord })
+        }
+        else {
+            res.status(400).send({ response: 'Failed to update brand status' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ response: 'Server Error, failed to update brand status' })
+    }
+})
+
+
+export default { createNewBrand, getBrands, updateBrandStatus }
