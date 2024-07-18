@@ -5,11 +5,12 @@ const subCategorySchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category"
     },
-    slug: {
-        type: String
-    },
     name: {
         type: String,
+    },
+    gender: {
+        type: String,
+        enum: ['male', 'female', 'unisex']
     },
     status: {
         type: Boolean,

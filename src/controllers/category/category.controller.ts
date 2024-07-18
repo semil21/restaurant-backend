@@ -14,7 +14,6 @@ const createNewCategory = expressAsyncHandler(async (req, res) => {
         }
     }
     catch (error) {
-        console.log('error --------', error)
         res.status(500).send({ response: 'Server Error, failed to create new category' })
     }
 })
@@ -100,4 +99,29 @@ const updateCategoryStatus = expressAsyncHandler(async (req, res) => {
     }
 })
 
-export default { createNewCategory, getCategories, updateCategory, deleteCategory, updateCategoryStatus }
+const getActiveCategories = expressAsyncHandler(async (req, res) => {
+    try {
+
+        const activeCategoriesPipeline = [
+            {
+                $match: {
+                    "status": true
+                }
+            }
+        ]
+
+        const getRecords = await Category.aggregate(activeCategoriesPipeline)
+
+        if (getRecords) {
+            res.status(200).send({ response: getRecords })
+        }
+        else {
+            res.status(500).send({ response: 'Failed to get active categories ' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ response: 'Server Error, failed to get active categories' })
+    }
+})
+
+export default { createNewCategory, getCategories, updateCategory, deleteCategory, updateCategoryStatus, getActiveCategories }

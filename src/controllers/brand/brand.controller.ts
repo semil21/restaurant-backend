@@ -129,5 +129,29 @@ const updateBrandStatus = expressAsyncHandler(async (req, res) => {
     }
 })
 
+const getActiveBrands = expressAsyncHandler(async (req, res) => {
+    try {
+        const activeBrandsPipeline = [
+            {
+                $match: {
+                    "status": true
+                }
+            }
+        ]
 
-export default { createNewBrand, getBrands, updateBrandStatus }
+        const getRecords = await Brand.aggregate(activeBrandsPipeline)
+
+        if (getRecords) [
+            res.status(200).send({ response: getRecords })
+        ]
+        else {
+            res.status(500).send({ response: 'Server Error, failed to get active brands' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ response: 'Server Error, failed to get active brands' })
+    }
+})
+
+
+export default { createNewBrand, getBrands, updateBrandStatus, getActiveBrands }
