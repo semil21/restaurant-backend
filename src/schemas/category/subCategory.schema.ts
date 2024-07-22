@@ -8,10 +8,6 @@ const subCategorySchema = new mongoose.Schema({
     name: {
         type: String,
     },
-    gender: {
-        type: String,
-        enum: ['male', 'female', 'unisex']
-    },
     status: {
         type: Boolean,
         default: true

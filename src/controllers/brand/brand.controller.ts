@@ -1,6 +1,7 @@
 import Brand from "../../schemas/brand/branch.schema"
 import BrandLogo from "../../schemas/brand/brandImage"
 import expressAsyncHandler from "express-async-handler"
+import Product from "../../schemas/products/product.schema";
 
 const createNewBrand = expressAsyncHandler(async (req: any, res: any) => {
     const { brandName, brandDescription, originCountry, brandLogo } = req.body;
@@ -136,6 +137,12 @@ const getActiveBrands = expressAsyncHandler(async (req, res) => {
                 $match: {
                     "status": true
                 }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1
+                }
             }
         ]
 
@@ -152,6 +159,8 @@ const getActiveBrands = expressAsyncHandler(async (req, res) => {
         res.status(500).send({ response: 'Server Error, failed to get active brands' })
     }
 })
+
+
 
 
 export default { createNewBrand, getBrands, updateBrandStatus, getActiveBrands }

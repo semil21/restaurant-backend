@@ -6,6 +6,12 @@ const productSizeSchema = new mongoose.Schema({
         ref: "Product"
     },
     size: {
+        type: String,
+    },
+    length: {
+        type: String
+    },
+    width: {
         type: String
     },
     status: {

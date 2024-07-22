@@ -1,6 +1,10 @@
 import mongoose from "mongoose"
 
 const productSchema = new mongoose.Schema({
+    brand: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category"
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category"
@@ -13,14 +17,21 @@ const productSchema = new mongoose.Schema({
         type: String,
         require: true
     },
-    brand: {
-        type: String,
-        require: true
+    description: {
+        type: String
+    },
+    material: {
+        type: String
+    },
+    origin: {
+        type: String
+    },
+    manufacturer: {
+        type: String
     },
     gender: {
-        type: String,
-        enum: ['male', 'female', 'unisex'],
-        default: null
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Gender"
     },
     status: {
         type: Boolean,

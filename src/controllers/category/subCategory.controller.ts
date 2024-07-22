@@ -2,10 +2,10 @@ import SubCategory from "../../schemas/category/subCategory.schema";
 import expressAsyncHandler from "express-async-handler";
 
 const saveSubCategory = expressAsyncHandler(async (req, res) => {
-    const { category, subCategory, gender } = req.body;
+    const { category, subCategory, } = req.body;
 
     try {
-        const newSubCategory = await SubCategory.create({ category: category, name: subCategory, gender: gender });
+        const newSubCategory = await SubCategory.create({ category: category, name: subCategory });
 
         const pipeline = [
             { $match: { _id: newSubCategory._id } },
@@ -23,7 +23,6 @@ const saveSubCategory = expressAsyncHandler(async (req, res) => {
                     _id: 1,
                     name: 1,
                     status: 1,
-                    gender: 1,
                     "category": "$category.name",
                     "category_id": "$category._id",
                     "category_status": "$category.status",
@@ -71,7 +70,6 @@ const getAllCategories = (expressAsyncHandler(async (req, res) => {
                     _id: 1,
                     name: 1,
                     status: 1,
-                    gender: 1,
                     category: 1,
                     category_status: 1,
                     category_id: 1
@@ -141,7 +139,6 @@ const editSubCategory = expressAsyncHandler(async (req, res) => {
                     $project: {
                         _id: 1,
                         name: 1,
-                        gender: 1,
                         status: 1,
                         createdAt: 1,
                         updatedAt: 1,
@@ -212,6 +209,12 @@ const getActiveSubCategory = expressAsyncHandler(async (req, res) => {
             {
                 $match: {
                     "status": true
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1
                 }
             }
         ]

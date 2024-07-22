@@ -25,6 +25,7 @@ import subCategoryRouter from "./routes/category/subCategory.route";
 import productRouter from "./routes/product/product.route";
 import productSizeRouter from "./routes/product/productSize.route";
 import brandRouter from "./routes/brand/brand.route";
+import genderRouter from "./routes/gender/gender.route";
 import notFound from "./middleware/notFound";
 
 app.use("/user", userRouter)
@@ -32,8 +33,9 @@ app.use("/admin", adminRouter)
 app.use("/category", categoryRouter)
 app.use("/subCategory", subCategoryRouter)
 app.use("/product", productRouter)
-app.use("/product-size", productSizeRouter)
+app.use("/size", productSizeRouter)
 app.use("/brand", brandRouter)
+app.use("/gender", genderRouter)
 
 
 

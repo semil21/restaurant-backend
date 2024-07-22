@@ -107,6 +107,12 @@ const getActiveCategories = expressAsyncHandler(async (req, res) => {
                 $match: {
                     "status": true
                 }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1
+                }
             }
         ]
 

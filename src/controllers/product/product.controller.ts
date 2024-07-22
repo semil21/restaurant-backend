@@ -1,15 +1,15 @@
 import Product from "../../schemas/products/product.schema";
+import mongoose from 'mongoose';
+
 import ProductColor from "../../schemas/products/color.schema";
 import ProductImage from "../../schemas/products/images.schema";
 import ProductSize from "../../schemas/products/size.schema";
 import expressAsyncHandler from "express-async-handler";
 
+
 const createNewProduct = expressAsyncHandler(async (req, res) => {
-
-    const { category, name, brand, gender } = req.body
-
     try {
-        const saveProduct = await Product.create({ category, name, brand, gender })
+        const saveProduct = await Product.create(req.body)
 
         if (saveProduct) {
             res.status(200).send({ response: saveProduct })
@@ -25,7 +25,33 @@ const createNewProduct = expressAsyncHandler(async (req, res) => {
 
 const getProducts = expressAsyncHandler(async (req, res) => {
     try {
-        const searchRecords = await Product.find().lean()
+
+        const productsPipeline = [
+            {
+                $lookup: {
+                    from: "genders",
+                    localField: "gender",
+                    foreignField: "_id",
+                    as: "result"
+                }
+            },
+            {
+                $unwind: "$result"
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    description: 1,
+                    material: 1,
+                    origin: 1,
+                    manufacturer: 1,
+                    gender: "$result.name"
+                }
+            }
+        ]
+
+        const searchRecords = await Product.aggregate(productsPipeline)
 
         if (searchRecords) {
             res.status(200).send({ response: searchRecords })
@@ -36,30 +62,128 @@ const getProducts = expressAsyncHandler(async (req, res) => {
     }
 })
 
-const getCategorizedProducts = expressAsyncHandler(async (req, res) => {
+const getProductDetails = expressAsyncHandler(async (req, res) => {
+    const { productId } = req.params
+    try {
+        const getProductDetailsPipeline = [
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(productId)
+                }
+            },
+            {
+                $lookup: {
+                    from: "brands",
+                    localField: "brand",
+                    foreignField: "_id",
+                    as: "brand"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$brand",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "category",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$category",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "subcategories",
+                    localField: "subCategory",
+                    foreignField: "_id",
+                    as: "subCategory"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$subCategory",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "genders",
+                    localField: "gender",
+                    foreignField: "_id",
+                    as: "gender"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$gender",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    description: 1,
+                    material: 1,
+                    origin: 1,
+                    manufacturer: 1,
+                    status: 1,
+                    brand_id: "$brand._id",
+                    brand_name: "$brand.name",
+                    brand_description: "$brand.description",
+                    brand_origin: "$brand.origin",
+                    brand_status: "$brand.status",
+                    category_id: "$category._id",
+                    category_name: "$category.name",
+                    category_status: "$category.status",
+                    subcategory_id: "$subCategory._id",
+                    subcategory_name: "$subCategory.name",
+                    subcategory_status: "$subCategory.status",
+                    gender_id: "$gender._id",
+                    gender: "$gender.name",
+                    gender_status: "$gender.status"
+                }
+            }
+        ]
 
-    const { categoryId } = req.params
+        const getProducts = await Product.aggregate(getProductDetailsPipeline)
 
-    const getProducts = await Product.find({ category: categoryId }).lean()
-
-    if (getProducts) {
-        res.status(200).send({ response: getProducts })
+        if (getProducts) {
+            res.status(200).send({ response: getProducts })
+        }
+        else {
+            res.status(400).send({ response: 'Failed to get product details' })
+        }
     }
-    else {
-        res.status(400).send({ response: 'Failed to get categorized products' })
 
+
+    catch (error) {
+        res.status(500).send({ response: 'Server error, failed to get product details' })
     }
 })
+
+
 
 const editProduct = expressAsyncHandler(async (req, res) => {
 
     const { productId } = req.params
     const { data } = req.body
 
+    console.log('productId -', productId)
+    console.log('data -', data)
+
     try {
         const updateRecord = await Product.findByIdAndUpdate(
             { _id: productId },
-            { data },
+            data,
             { new: true }
         )
 
@@ -98,4 +222,6 @@ const deleteProduct = expressAsyncHandler(async (req, res) => {
     }
 })
 
-export default { createNewProduct, editProduct, getProducts, getCategorizedProducts, deleteProduct }
+
+
+export default { createNewProduct, editProduct, getProducts, getProductDetails, deleteProduct, }
