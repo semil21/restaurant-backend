@@ -33,6 +33,14 @@ const productSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Gender"
     },
+    newArrival: {
+        type: Boolean,
+        default: false
+    },
+    featured: {
+        type: Boolean,
+        default: false
+    },
     status: {
         type: Boolean,
         default: true

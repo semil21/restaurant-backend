@@ -15,6 +15,13 @@ const productColorSchema = new mongoose.Schema({
     stock: {
         type: Number
     },
+    price: {
+        type: Number
+    },
+    discount: {
+        type: Number,
+        default: 0
+    },
     status: {
         type: Boolean,
         default: true

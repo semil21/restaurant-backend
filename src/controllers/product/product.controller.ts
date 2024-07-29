@@ -2,7 +2,6 @@ import Product from "../../schemas/products/product.schema";
 import mongoose from 'mongoose';
 
 import ProductColor from "../../schemas/products/color.schema";
-import ProductImage from "../../schemas/products/images.schema";
 import ProductSize from "../../schemas/products/size.schema";
 import expressAsyncHandler from "express-async-handler";
 
@@ -46,7 +45,10 @@ const getProducts = expressAsyncHandler(async (req, res) => {
                     material: 1,
                     origin: 1,
                     manufacturer: 1,
-                    gender: "$result.name"
+                    gender: "$result.name",
+                    newArrival: 1,
+                    featured: 1
+
                 }
             }
         ]
@@ -177,9 +179,6 @@ const editProduct = expressAsyncHandler(async (req, res) => {
     const { productId } = req.params
     const { data } = req.body
 
-    console.log('productId -', productId)
-    console.log('data -', data)
-
     try {
         const updateRecord = await Product.findByIdAndUpdate(
             { _id: productId },
@@ -210,7 +209,6 @@ const deleteProduct = expressAsyncHandler(async (req, res) => {
             res.status(200).send({ response: deleteRecord })
 
             const deleteProductColors = await ProductColor.deleteMany({ product: productId })
-            const deleteProductImages = await ProductImage.deleteMany({ product: productId })
             const deleteProductSizes = await ProductSize.deleteMany({ product: productId })
         }
         else {
@@ -222,6 +220,52 @@ const deleteProduct = expressAsyncHandler(async (req, res) => {
     }
 })
 
+const handleFeaturedStatus = expressAsyncHandler(async (req, res) => {
+    const { productId } = req.params
+    const { newStatus } = req.body
+
+    try {
+        const updateStatus = await Product.findByIdAndUpdate(
+            { _id: productId },
+            { featured: newStatus },
+            { new: true }
+        )
+
+        if (updateStatus) {
+            res.status(200).send({ response: "Status updated successfully" })
+        }
+        else {
+            res.status(400).send({ response: 'Failed to update feature status' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ response: "Server error, failed to update featured status of the product" })
+    }
+})
+
+const handleNewArrivalStatus = expressAsyncHandler(async (req, res) => {
+    const { productId } = req.params
+    const { newStatus } = req.body
+    try {
+        const updateStatus = await Product.findByIdAndUpdate(
+            { _id: productId },
+            { newArrival: newStatus },
+            { new: true }
+        )
 
 
-export default { createNewProduct, editProduct, getProducts, getProductDetails, deleteProduct, }
+        if (updateStatus) {
+            res.status(200).send({ response: "New Arrival status updated successfully" })
+        }
+        else {
+            res.status(500).send({ response: 'Failed to update new arrival status' })
+        }
+    }
+    catch (error) {
+        res.status(500).send({ response: "Server error, Failed to update fresh arrivals status" })
+    }
+})
+
+
+
+export default { createNewProduct, editProduct, getProducts, getProductDetails, deleteProduct, handleFeaturedStatus, handleNewArrivalStatus }

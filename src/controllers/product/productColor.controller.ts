@@ -1,10 +1,12 @@
+import { error } from "console";
 import ProductColor from "../../schemas/products/color.schema";
 import expressAsyncHandler from "express-async-handler";
+import mongoose from "mongoose";
 
 const saveProductColor = expressAsyncHandler(async (req, res) => {
-    const { productId, sizeId, name, stock } = req.body
+
     try {
-        const saveRecord = await ProductColor.create({ product: productId, size: sizeId, name, stock })
+        const saveRecord = await ProductColor.create(req.body)
 
         if (saveRecord) {
             res.status(200).send({ response: saveRecord })
@@ -20,25 +22,47 @@ const saveProductColor = expressAsyncHandler(async (req, res) => {
 
 const getProductColors = expressAsyncHandler(async (req, res) => {
 
-    const { productId, sizeId, } = req.body
+    const { product, size } = req.body
 
-    const getRecords = await ProductColor.find({ product: productId, size: sizeId }).lean()
+    const getProdutsPipeline = [
+        {
+            $match: {
+                product: new mongoose.Types.ObjectId(product),
+                size: new mongoose.Types.ObjectId(size)
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                name: 1,
+                stock: 1,
+                price: 1,
+                discount: 1,
+                status: 1,
+                product: 1
+
+            }
+        }
+    ]
+
+    const getRecords = await ProductColor.aggregate(getProdutsPipeline)
 
     if (getRecords) {
         res.status(200).send({ response: getRecords })
     }
     else {
-        res.status(400).send({ response: 'Failed to get product colors' })
+        res.status(200).send({ response: 'Failed  to get colors data' })
     }
 })
 
 const editProductColor = expressAsyncHandler(async (req, res) => {
     const { productColorId } = req.params
 
+
     const { productId, sizeId, name, stock } = req.body
     const editRecord = await ProductColor.findByIdAndUpdate(
         { _id: productColorId },
-        { product: productId, size: sizeId, name, stock },
+        req.body,
         { new: true }
     )
 
@@ -64,5 +88,29 @@ const deleteProductColor = expressAsyncHandler(async (req, res) => {
     }
 })
 
+const handleColorStatus = expressAsyncHandler(async (req, res) => {
+    const { id } = req.params
+    const { newStatus } = req.body
+    try {
+        const updateRecord = await ProductColor.findByIdAndUpdate(
+            { _id: id },
+            { status: newStatus },
+            { new: true }
+        )
 
-export default { saveProductColor, getProductColors, editProductColor, deleteProductColor }
+        if (updateRecord) {
+            res.status(200).send({ response: updateRecord })
+        }
+        else {
+            res.status(500).send({ response: 'Failed to update color status' })
+        }
+
+
+    }
+    catch (error) {
+        res.status(500).send({ response: 'Server error, Failed to update color status' })
+    }
+})
+
+
+export default { saveProductColor, getProductColors, editProductColor, deleteProductColor, handleColorStatus }

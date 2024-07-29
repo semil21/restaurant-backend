@@ -1,20 +1,20 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
-const productImageSchema = new mongoose.Schema({
-    product: {
+const imagesSchema = new mongoose.Schema({
+
+    color: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product"
+        ref: "ProductColor"
     },
-    tileImage: {
+    image: {
         type: String
     },
-    images: [
-        {
-            type: String
-        }
-    ]
+    status: {
+        type: Boolean,
+        default: true
+    }
 })
 
-const ProductImage = mongoose.model("ProductImage", productImageSchema)
+const Image = mongoose.model("Image", imagesSchema)
 
-export default ProductImage
+export default Image
