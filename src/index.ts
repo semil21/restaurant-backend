@@ -3,6 +3,8 @@ import connectDB from "./database/database";
 import Express from "express";
 import bodyParser from "body-parser";
 
+import { superAdminRouter } from "./routes/super-admin/super-admin.route";
+
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -18,30 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 
-import userRouter from "./routes/user.route";
-import adminRouter from "./routes/admin.route";
-import categoryRouter from "./routes/category/category.route";
-import subCategoryRouter from "./routes/category/subCategory.route";
-import productRouter from "./routes/product/product.route";
-import productSizeRouter from "./routes/product/productSize.route";
-import brandRouter from "./routes/brand/brand.route";
-import genderRouter from "./routes/gender/gender.route";
-import tileImageRouter from "./routes/product/tileImage.route"
-import imageRouter from "./routes/product/image.route";
-import notFound from "./middleware/notFound";
-import productColorRouter from "./routes/product/productColor.route";
+// super admin routes
 
-app.use("/user", userRouter)
-app.use("/admin", adminRouter)
-app.use("/category", categoryRouter)
-app.use("/subCategory", subCategoryRouter)
-app.use("/product", productRouter)
-app.use("/size", productSizeRouter)
-app.use("/color", productColorRouter)
-app.use("/tile-image", tileImageRouter)
-app.use("/image", imageRouter)
-app.use("/brand", brandRouter)
-app.use("/gender", genderRouter)
+app.use("/login", superAdminRouter);
 
 // app.use(notFound);
 
