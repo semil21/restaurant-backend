@@ -4,6 +4,7 @@ import Express from "express";
 import bodyParser from "body-parser";
 
 import { superAdminRouter } from "./routes/super-admin/super-admin.route";
+import { adminRouter } from "./routes/admin/admin.route";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -21,8 +22,10 @@ app.use((req, res, next) => {
 });
 
 // super admin routes
+app.use("/super-admin", superAdminRouter);
 
-app.use("/login", superAdminRouter);
+// admin route
+app.use("/admin", adminRouter);
 
 // app.use(notFound);
 

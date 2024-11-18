@@ -1,5 +1,5 @@
 import expressAsyncHandler from "express-async-handler";
-import { superAdminLogin } from "../../schemas/super-admin/login";
+import { superAdminLogin } from "../../schemas/super-admin/super-admin-login.schema";
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
@@ -28,6 +28,7 @@ const createNewSuperAdmin = expressAsyncHandler(
 const verifySuperAdminLogin = expressAsyncHandler(
   async (req: Request, res: Response) => {
     const { email, password } = req.body;
+
     try {
       const verifyUserExists = await superAdminLogin.findOne({
         email: email,
@@ -43,7 +44,7 @@ const verifySuperAdminLogin = expressAsyncHandler(
       const isPasswordCorrect = await bcrypt.compare(password, hashedPassword);
 
       if (isPasswordCorrect) {
-        res.status(200).send({ response: verifyUserExists });
+        res.status(200).send({ response: "Login Successful" });
       } else {
         res.status(400).send({ response: "Incorrect Password" });
       }
